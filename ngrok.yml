@@ -5,4 +5,4 @@ tunnels:
     proto: http
     schemes:
       - http
-    domain: http://localhost:9000
+    domain: https://puma-cute-duck.ngrok-free.app
