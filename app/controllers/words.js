@@ -1,72 +1,34 @@
-const mongoose = require('mongoose')
-const model = require('../models/words')
-const options = {
-    page: 1,
-    limit: 3
-};
-const parseId = (id) => {
-    return mongoose.Types.ObjectId(id)
-}
-/**
- * Obtener DATA de USUARIOS
- */
-exports.getData = (req, res) => {
-    model.find({}, (err, docs) => {
-        res.send({
-            items: docs
-        })
-    })
-}
-/**
- * Obtener DATA de USUARIOS
- */
-exports.getSingle = (req, res) => {
-    model.findOne({ _id: parseId(req.params.id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
-/**
- * Obtener DATA de USUARIOS
- */
-exports.updateSingle = (req, res) => {
-    const { id } = req.params
-    const body = req.body
-    model.updateOne(
-        { _id: parseId(id) },
-        body,
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
-/**
- * Insertar DATA de USUARIOS
- */
-exports.insertData = (req, res) => {
-    const data = req.body
-    model.create(data, (err, docs) => {
-        if (err) {
-            res.status(422.).send({ error: 'Error' })
-        } else {
-            res.send({ data: docs })
-        }
+const mongoose = require('mongoose');
+const model = require('../models/words');
 
-    })
-}
-/**
- * Obtener DATA de USUARIOS
- */
-exports.deleteSingle = (req, res) => {
-    const { id } = req.params
-    model.deleteOne(
-        { _id: parseId(id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+// Función para manejar las operaciones de base de datos y respuestas
+const handleDatabaseOperation = async (operation, res, successStatus = 200) => {
+    try {
+        const result = await operation;
+        res.status(successStatus).send({ items: result });
+    } catch (err) {
+        console.error(err); // Registro de errores para depuración
+        res.status(422).send({ error: 'Error' });
+    }
+};
+
+// Función para convertir el ID a formato de MongoDB
+const parseId = id => mongoose.Types.ObjectId(id);
+
+// Función para obtener el controlador adecuado
+const getController = (operation, successStatus = 200) => async (req, res) => {
+    const { id } = req.params;
+    const data = id ? { _id: parseId(id) } : {};
+    handleDatabaseOperation(operation(data, req.body), res, successStatus);
+};
+
+// Controladores para las operaciones CRUD
+exports.getData = getController(model.find.bind(model));
+
+exports.getSingle = getController((data) => model.findOne(data));
+
+exports.updateSingle = getController((data, body) => model.updateOne(data, body));
+
+exports.insertData = getController((data) => model.create(data), 201);
+
+exports.deleteSingle = getController((data) => model.deleteOne(data));
