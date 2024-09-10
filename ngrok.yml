@@ -4,5 +4,6 @@ tunnels:
     addr: http://sonar:9000
     proto: http
     schemes:
+      - https
       - http
-    domain: https://puma-cute-duck.ngrok-free.app
+    domain: puma-cute-duck.ngrok-free.app
