@@ -1,72 +1,58 @@
-const mongoose = require('mongoose')
-const model = require('../models/links')
-const options = {
-    page: 1,
-    limit: 3
+const mongoose = require('mongoose');
+const model = require('../models/links');
+
+// Función para parsear el ID de MongoDB
+const parseId = (id) => mongoose.Types.ObjectId(id);
+
+// Función común para manejar las respuestas y errores
+const sendResponse = (res, err, docs) => {
+    if (err) {
+        res.status(500).send({ error: 'Error en la operación' });
+    } else {
+        res.send({ items: docs });
+    }
 };
-const parseId = (id) => {
-    return mongoose.Types.ObjectId(id)
-}
+
+// Función genérica para operaciones CRUD
+const handleOperation = (operation, res, query = {}, data = null) => {
+    if (operation === 'create') {
+        model[operation](data, (err, docs) => sendResponse(res, err, docs));
+    } else {
+        model[operation](query, data, (err, docs) => sendResponse(res, err, docs));
+    }
+};
+
 /**
- * Obtener DATA de USUARIOS
+ * Obtener múltiples registros de USUARIOS
  */
 exports.getData = (req, res) => {
-    model.find({}, (err, docs) => {
-        res.send({
-            items: docs
-        })
-    })
-}
+    handleOperation('find', res);
+};
+
 /**
- * Obtener DATA de USUARIOS
+ * Obtener un solo registro de USUARIOS
  */
 exports.getSingle = (req, res) => {
-    model.findOne({ _id: parseId(req.params.id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    handleOperation('findOne', res, { _id: parseId(req.params.id) });
+};
+
 /**
- * Obtener DATA de USUARIOS
+ * Actualizar un solo registro de USUARIOS
  */
 exports.updateSingle = (req, res) => {
-    const { id } = req.params
-    const body = req.body
-    model.updateOne(
-        { _id: parseId(id) },
-        body,
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    handleOperation('updateOne', res, { _id: parseId(req.params.id) }, req.body);
+};
+
 /**
- * Insertar DATA de USUARIOS
+ * Insertar un nuevo registro de USUARIOS
  */
 exports.insertData = (req, res) => {
-    const data = req.body
-    model.create(data, (err, docs) => {
-        if (err) {
-            res.status(422.).send({ error: 'Error' })
-        } else {
-            res.send({ data: docs })
-        }
+    handleOperation('create', res, {}, req.body);
+};
 
-    })
-}
 /**
- * Obtener DATA de USUARIOS
+ * Eliminar un solo registro de USUARIOS
  */
 exports.deleteSingle = (req, res) => {
-    const { id } = req.params
-    model.deleteOne(
-        { _id: parseId(id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    handleOperation('deleteOne', res, { _id: parseId(req.params.id) });
+};
