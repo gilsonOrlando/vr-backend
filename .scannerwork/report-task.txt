@@ -2,5 +2,5 @@ projectKey=vr-backen
 serverUrl=http://localhost:9000
 serverVersion=10.6.0.92116
 dashboardUrl=http://localhost:9000/dashboard?id=vr-backen
-ceTaskId=ae10aa93-23f3-4805-98da-6b3b835a6b62
-ceTaskUrl=http://localhost:9000/api/ce/task?id=ae10aa93-23f3-4805-98da-6b3b835a6b62
+ceTaskId=1efd9ccf-c2e1-4f04-baaf-4280a00fa5e3
+ceTaskUrl=http://localhost:9000/api/ce/task?id=1efd9ccf-c2e1-4f04-baaf-4280a00fa5e3

@@ -1,61 +1,40 @@
 const mongoose = require('mongoose');
-const model = require('../models/audio');
+const model = require('../models/funcion');
 
-// Función para parsear ID
-const parseId = (id) => mongoose.Types.ObjectId(id);
-
-// Función auxiliar para manejar las respuestas
-const handleResponse = (res, successMessage) => (err, docs) => {
-    if (err) {
-        res.status(err.status || 500).send({ error: err.message || 'Internal Server Error' });
-    } else {
-        res.send(successMessage ? { message: successMessage, items: docs } : { items: docs });
-    }
+// Función para manejar la respuesta y errores
+const handleResponse = (res, promise, successStatus = 200) => {
+    promise
+        .then(docs => res.status(successStatus).send({ items: docs }))
+        .catch(err => {
+            console.error(err); // Para propósitos de depuración
+            res.status(422).send({ error: 'Error' });
+        });
 };
 
-// Función auxiliar para manejar operaciones de base de datos
-const handleDatabaseOperation = (operation, req, res) => {
-    operation((err, result) => {
-        handleResponse(res, err, result);
-    });
-};
+// Función para obtener el ID de MongoDB
+const parseId = id => mongoose.Types.ObjectId(id);
 
-/**
- * Obtener todos los datos de audio
- */
+// Controlador para obtener todos los datos
 exports.getData = (req, res) => {
-    handleDatabaseOperation((callback) => model.find({}, callback), req, res);
+    handleResponse(res, model.find({}).exec());
 };
 
-/**
- * Obtener un solo audio por ID
- */
+// Controlador para obtener un solo dato
 exports.getSingle = (req, res) => {
-    const { id } = req.params;
-    handleDatabaseOperation((callback) => model.findOne({ _id: parseId(id) }, callback), req, res);
+    handleResponse(res, model.findOne({ _id: parseId(req.params.id) }).exec());
 };
 
-/**
- * Actualizar datos del audio por ID
- */
+// Controlador para actualizar un dato
 exports.updateSingle = (req, res) => {
-    const { id } = req.params;
-    const body = req.body;
-    handleDatabaseOperation((callback) => model.updateOne({ _id: parseId(id) }, body, callback), req, res);
+    handleResponse(res, model.updateOne({ _id: parseId(req.params.id) }, req.body).exec());
 };
 
-/**
- * Insertar datos del audio en la base de datos
- */
+// Controlador para insertar un dato
 exports.insertData = (req, res) => {
-    const data = req.body;
-    handleDatabaseOperation((callback) => model.create(data, callback), req, res);
+    handleResponse(res, model.create(req.body), 201); // 201 para "Created"
 };
 
-/**
- * Eliminar un audio por ID
- */
+// Controlador para eliminar un dato
 exports.deleteSingle = (req, res) => {
-    const { id } = req.params;
-    handleDatabaseOperation((callback) => model.deleteOne({ _id: parseId(id) }, callback), req, res);
+    handleResponse(res, model.deleteOne({ _id: parseId(req.params.id) }).exec());
 };
