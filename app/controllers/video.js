@@ -1,70 +1,43 @@
-const mongoose = require('mongoose')
-const model = require('../models/video')
-const options = {
-    page: 1,
-    limit: 3
-};
-const parseId = (id) => {
-    return mongoose.Types.ObjectId(id)
-}
-/**
- * Obtener DATA de USUARIOS
- */
-exports.getData = (req, res) => {
-    model.find({}, (err, docs) => {
-        res.send({
-            items: docs
-        })
-    })
-}
-/**
- * Obtener DATA de USUARIOS
- */
-exports.getSingle = (req, res) => {
-    model.findOne({ _id: parseId(req.params.id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
-/**
- * Obtener DATA de USUARIOS
- */
-exports.updateSingle = (req, res) => {
-    const { id } = req.params
-    const body = req.body
-    model.updateOne(
-        { _id: parseId(id) },
-        body,
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
-//Guardar datos del video en la base de datos
-exports.insertData = (req, res) => {
-    const data = req.body
-    model.create(data, (err, docs) => {
-        if (err) {
-            res.status(422.).send({ error: 'Error' })
-        } else {
-            res.send({ data: docs })
-        }
+const mongoose = require('mongoose');
+const model = require('../models/video');
 
-    })
-}
-/**
- * Obtener DATA de USUARIOS
- */
+// Función para manejar operaciones de base de datos
+const handleDatabaseOperation = async (operation, res, successStatus = 200) => {
+    try {
+        const result = await operation;
+        res.status(successStatus).send({ items: result });
+    } catch (err) {
+        console.error(err); // Registro de errores para depuración
+        res.status(422).send({ error: 'Error' });
+    }
+};
+
+// Función para convertir el ID a formato de MongoDB
+const parseId = id => mongoose.Types.ObjectId(id);
+
+// Controlador para obtener todos los datos
+exports.getData = (req, res) => {
+    handleDatabaseOperation(model.find({}).exec(), res);
+};
+
+// Controlador para obtener un solo dato
+exports.getSingle = (req, res) => {
+    handleDatabaseOperation(model.findOne({ _id: parseId(req.params.id) }).exec(), res);
+};
+
+// Controlador para actualizar un dato
+exports.updateSingle = (req, res) => {
+    const { id } = req.params;
+    const body = req.body;
+    handleDatabaseOperation(model.updateOne({ _id: parseId(id) }, body).exec(), res);
+};
+
+// Controlador para insertar un nuevo dato
+exports.insertData = (req, res) => {
+    handleDatabaseOperation(model.create(req.body), res, 201); // 201 para "Created"
+};
+
+// Controlador para eliminar un dato
 exports.deleteSingle = (req, res) => {
-    const { id } = req.params
-    model.deleteOne(
-        { _id: parseId(id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    handleDatabaseOperation(model.deleteOne({ _id: parseId(req.params.id) }).exec(), res);
+};
