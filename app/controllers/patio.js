@@ -1,78 +1,38 @@
-const mongoose = require('mongoose')
-const model = require('../models/patio')
+const mongoose = require('mongoose');
+const model = require('../models/patio');
 
-const parseId = (id) => {
-    return mongoose.Types.ObjectId(id)
-}
-/**
- * Obtener DATA de USUARIOS
- */
+// Función para manejar operaciones de base de datos
+const handleOperation = async (operation, res, successStatus = 200) => {
+    try {
+        const result = await operation;
+        res.status(successStatus).send({ items: result });
+    } catch (err) {
+        console.error(err); // Registro de errores para depuración
+        res.status(422).send({ error: 'Error' });
+    }
+};
 
-exports.getData = (req, res) => {
-    model.find({}, (err, docs) => {
-        res.send({
-            items: docs
-        })
-    })
-}
+// Función para convertir el ID a formato de MongoDB
+const parseId = id => mongoose.Types.ObjectId(id);
 
-/**
- * Obtener DATA de USUARIOS
- */
+// Operaciones de base de datos encapsuladas en funciones
+const findAll = () => model.find({});
+const findById = id => model.findOne({ _id: parseId(id) });
+const updateById = (id, body) => model.updateOne({ _id: parseId(id) }, body);
+const deleteById = id => model.deleteOne({ _id: parseId(id) });
+const create = data => model.create(data);
 
-exports.getSingle = (req, res) => {
-    model.findOne({ _id: parseId(req.params.id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+// Controladores CRUD
+exports.getData = (req, res) => handleOperation(findAll(), res);
 
-/**
- * Obtener DATA de USUARIOS
- */
+exports.getSingle = (req, res) => handleOperation(findById(req.params.id), res);
 
 exports.updateSingle = (req, res) => {
-    const { id } = req.params
-    const body = req.body
-    model.updateOne(
-        { _id: parseId(id) },
-        body,
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    handleOperation(updateById(req.params.id, req.body), res);
+};
 
-
-/**
- * Insertar DATA de USUARIOS
- */
 exports.insertData = (req, res) => {
-    const data = req.body
-    model.create(data, (err, docs) => {
-        if (err) {
-            res.status(422.).send({ error: 'Error' })
-        } else {
-            res.send({ data: docs })
-        }
+    handleOperation(create(req.body), res, 201);
+};
 
-    })
-}
-
-/**
- * Obtener DATA de USUARIOS
- */
-
-exports.deleteSingle = (req, res) => {
-    const { id } = req.params
-    model.deleteOne(
-        { _id: parseId(id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+exports.deleteSingle = (req, res) => handleOperation(deleteById(req.params.id), res);
