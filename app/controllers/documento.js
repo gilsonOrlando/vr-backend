@@ -1,72 +1,56 @@
-const mongoose = require('mongoose')
-const model = require('../models/documento')
-const options = {
-    page: 1,
-    limit: 3
+const mongoose = require('mongoose');
+const model = require('../models/documento');
+
+// Función para parsear ID
+const parseId = (id) => mongoose.Types.ObjectId(id);
+
+// Función auxiliar para manejar las respuestas
+const handleResponse = (res, successMessage) => (err, docs) => {
+    if (err) {
+        res.status(err.status || 500).send({ error: err.message || 'Internal Server Error' });
+    } else {
+        res.send(successMessage ? { message: successMessage, items: docs } : { items: docs });
+    }
 };
-const parseId = (id) => {
-    return mongoose.Types.ObjectId(id)
-}
+
+// Función auxiliar para manejar la creación de documentos
+const handleCreationResponse = (res) => handleResponse(res, 'Document created successfully');
+
 /**
- * Obtener DATA de USUARIOS
+ * Obtener todos los datos de documentos
  */
 exports.getData = (req, res) => {
-    model.find({}, (err, docs) => {
-        res.send({
-            items: docs
-        })
-    })
-}
+    model.find({}, handleResponse(res));
+};
+
 /**
- * Obtener DATA de USUARIOS
+ * Obtener un solo documento por ID
  */
 exports.getSingle = (req, res) => {
-    model.findOne({ _id: parseId(req.params.id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    model.findOne({ _id: parseId(req.params.id) }, handleResponse(res));
+};
+
 /**
- * Obtener DATA de USUARIOS
+ * Actualizar datos del documento por ID
  */
 exports.updateSingle = (req, res) => {
-    const { id } = req.params
-    const body = req.body
-    model.updateOne(
-        { _id: parseId(id) },
-        body,
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    const { id } = req.params;
+    const body = req.body;
+    model.updateOne({ _id: parseId(id) }, body, handleResponse(res, 'Document updated successfully'));
+};
+
 /**
- * Insertar DATA de USUARIOS
+ * Insertar datos del documento en la base de datos
  */
 exports.insertData = (req, res) => {
-    const data = req.body
-    model.create(data, (err, docs) => {
-        if (err) {
-            res.status(422.).send({ error: 'Error' })
-        } else {
-            res.send({ data: docs })
-        }
+    const data = req.body;
+    model.create(data, handleCreationResponse(res));
+};
 
-    })
-}
 /**
- * Obtener DATA de USUARIOS
+ * Eliminar un documento por ID
  */
 exports.deleteSingle = (req, res) => {
-    const { id } = req.params
-    model.deleteOne(
-        { _id: parseId(id) },
-        (err, docs) => {
-            res.send({
-                items: docs
-            })
-        })
-}
+    const { id } = req.params;
+    model.deleteOne({ _id: parseId(id) }, handleResponse(res, 'Document deleted successfully'));
+};
