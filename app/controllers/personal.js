@@ -37,6 +37,8 @@ const executeModelOperation = async (operation, query, body = null) => {
         }
         return result;
     } catch (err) {
+        console.error(`Error en la operación ${operation}:`, err.message);
+        // Rethrow the error to handle it at a higher level
         throw err;
     }
 };
