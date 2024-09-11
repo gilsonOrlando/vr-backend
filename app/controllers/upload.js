@@ -65,8 +65,6 @@ const uploadPdf = multer({
         if (file.mimetype === 'application/pdf') {
             cb(null, true);
         } else {
-            // req.fileValidationError='consola: Only .png, .jpg and .jpeg format allowed!';
-            // cb(null, false);
             return cb(new Error('Permitido solo documentos de tipo .pdf'));
         }
     }

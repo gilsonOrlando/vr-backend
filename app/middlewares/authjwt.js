@@ -7,7 +7,7 @@ exports.verifyToken = async (req, res, next) => {
         if(!token)return res.status(403).json({message:"no token provided"})
         const decoded=jwt.verify(token,_tokenSecret)
         req.userId=decoded.data._id
-        var user=await User.findOne({ _id: decoded.data._id },
+        let user=await User.findOne({ _id: decoded.data._id },
             (err, docs) => {
                 return docs
             })
@@ -19,7 +19,7 @@ exports.verifyToken = async (req, res, next) => {
 }
 //Verificar si el tipo de usuarios es administrador
 exports.isAdmin = async (req, res, next) => {
-    var user2=await User.findOne({ _id: req.userId},
+    let user2=await User.findOne({ _id: req.userId},
         (err, docs) => {
             return docs
         })
@@ -29,7 +29,7 @@ exports.isAdmin = async (req, res, next) => {
     }
 //Chequear si el correo ya esta registrado
 exports.checkDuplicateEmail = async (req, res, next) => {
-    var user=await User.findOne({ email: req.body.email},
+    let user=await User.findOne({ email: req.body.email},
         (err, docs) => {
             return docs
         })

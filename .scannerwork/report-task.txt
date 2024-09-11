@@ -2,5 +2,5 @@ projectKey=vr-backend
 serverUrl=http://localhost:9000
 serverVersion=10.6.0.92116
 dashboardUrl=http://localhost:9000/dashboard?id=vr-backend
-ceTaskId=cbe9dc23-a447-43b8-9dfa-f15702c330d4
-ceTaskUrl=http://localhost:9000/api/ce/task?id=cbe9dc23-a447-43b8-9dfa-f15702c330d4
+ceTaskId=51274a65-f0c4-41b4-99a4-a157a6471342
+ceTaskUrl=http://localhost:9000/api/ce/task?id=51274a65-f0c4-41b4-99a4-a157a6471342
